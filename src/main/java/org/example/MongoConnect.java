@@ -13,15 +13,17 @@ import com.mongodb.client.model.Aggregates;
 import org.bson.conversions.Bson;
 import com.mongodb.client.model.*;
 import java.util.Arrays;
+import com.mongodb.client.model.Accumulators;
 public class MongoConnect {
     MongoClient client=null;
     MongoCollection<Document> collection=null;
 
     public void retrieveFamousFriends(){
         Bson matchStage=Aggregates.match(Filters.eq("User", System.getProperty("profile")));
-        Bson sortStage=Aggregates.sort(Sorts.orderBy(Sorts.descending("Followers")));
+        Bson groupStage=Aggregates.group("$Location", Accumulators.sum("Friends", 1));
+        Bson sortStage=Aggregates.sort(Sorts.orderBy(Sorts.descending("Friends")));
 
-        collection.aggregate(Arrays.asList(matchStage, sortStage)).forEach(document -> System.out.println(document.getString("Name")));
+        collection.aggregate(Arrays.asList(matchStage, groupStage, sortStage)).forEach(document -> System.out.println(document.toJson()));
     }
 
     public void storeFriends(List<TwitterProfile> friends){
@@ -35,7 +37,8 @@ public class MongoConnect {
                     .append("UserName", friend.getScreenName())
                     .append("Description", friend.getDescription())
                     .append("Following", friend.getFriendsCount())
-                    .append("Followers", friend.getFollowersCount());
+                    .append("Followers", friend.getFollowersCount())
+                    .append("Location", friend.getLocation());
 
 
             collection.insertOne(doc);

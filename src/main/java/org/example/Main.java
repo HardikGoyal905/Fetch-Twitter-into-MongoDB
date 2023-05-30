@@ -35,7 +35,7 @@ public class Main {
     public static int askFunc(){
         System.out.println("Which type of Functionality you want:");
         System.out.println("1. Store Friends");
-        System.out.println("2. Retrieve The Most Famous Friend");
+        System.out.println("2. Expose The FanBase");
 
 
         try {
